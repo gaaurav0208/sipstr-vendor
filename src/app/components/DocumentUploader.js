@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import PrimaryButton from './PrimaryButton';
 
-const DocumentUploader = ({ label, onChange }) => {
+const DocumentUploader = ({ label, onChange, error }) => {
   const fileInputRef = useRef();
 
   const handleBrowseClick = () => {
@@ -32,6 +32,7 @@ const DocumentUploader = ({ label, onChange }) => {
         onChange={onChange}
         className="hidden"
       />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
 };

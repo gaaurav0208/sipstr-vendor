@@ -17,7 +17,7 @@ export const Onboarding = () => {
     const [formData, setFormData] = useState({
         storeName: '',
         corporationName: '',
-        ein: 0,
+        ein: '',
         licenseNumber: '',
         description: '',
         storeEmail: '',
@@ -35,6 +35,8 @@ export const Onboarding = () => {
         weekDaysCloseTime: '',
         holidayDates: [],
     });
+
+    const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
         if (data) {
@@ -77,9 +79,56 @@ export const Onboarding = () => {
         setFormData((prev) => ({ ...prev, holidayDates: updatedDates }));
     };
 
+    const validateForm = () => {
+        const errors = {};
+        const requiredFields = [
+            'storeName',
+            'corporationName',
+            'ein',
+            'licenseNumber',
+            'description',
+            'storeEmail',
+            'storeContactNumber',
+            'address1',
+            'city',
+            'state',
+            'zipcode',
+            'country',
+            'liquorLicenseUrl',
+            'weekendOpenTime',
+            'weekendCloseTime',
+            'weekDaysOpenTime',
+            'weekDaysCloseTime',
+        ];
+
+        requiredFields.forEach((field) => {
+            if (!formData[field] || formData[field].toString().trim() === '') {
+                errors[field] = 'This field is required';
+            }
+        });
+
+        if (formData.storeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.storeEmail)) {
+            errors.storeEmail = 'Invalid email format';
+        }
+
+        if (formData.storeContactNumber && !/^(\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$/.test(formData.storeContactNumber)) {
+            errors.storeContactNumber = 'Invalid contact number (e.g. +1-555-987-1234)';
+        }
+        
+        if (formData.ein && !/^\d{2}-?\d{7}$/.test(formData.ein.toString())) {
+            errors.ein = 'Invalid EIN (must be 9 digits, optionally with a dash after 2 digits)';
+        }
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!validateForm()) {
+            toast.error('Please fill the required fields with correct format');
+            return;
+        }
 
         const payload = {
             ...formData,
@@ -90,7 +139,8 @@ export const Onboarding = () => {
 
         mutate(payload, {
             onSuccess: () => {
-                toast.success('Onboarding details submitted successfully!');
+                setFormErrors({});
+                toast.success('Onboarding submitted successfully!');
             },
             onError: (error) => {
                 toast.error(error?.message || 'Submission failed!');
@@ -107,40 +157,35 @@ export const Onboarding = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Business Details */}
                 <Section title="Business Details">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <InputField label="Business Name" name="storeName" value={formData.storeName} onChange={handleChange} />
-                        <InputField label="Corporation Name" name="corporationName" value={formData.corporationName} onChange={handleChange} />
-                        <InputField label="EIN Number" name="ein" value={formData.ein} onChange={handleChange} />
-                        <InputField label="License Number" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} />
-                        <InputField label="Description" name="description" value={formData.description} onChange={handleChange} />
+                        <InputField label="Business Name" name="storeName" value={formData.storeName} onChange={handleChange} error={formErrors.storeName} />
+                        <InputField label="Corporation Name" name="corporationName" value={formData.corporationName} onChange={handleChange} error={formErrors.corporationName} />
+                        <InputField label="EIN Number" name="ein" value={formData.ein} onChange={handleChange} error={formErrors.ein} />
+                        <InputField label="License Number" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} error={formErrors.licenseNumber} />
+                        <InputField label="Description" name="description" value={formData.description} onChange={handleChange} error={formErrors.description} />
                     </div>
                 </Section>
 
-                {/* Contact Details */}
                 <Section title="Contact Details">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <InputField label="Contact Email" name="storeEmail" value={formData.storeEmail} onChange={handleChange} />
-                        <InputField label="Contact Number" name="storeContactNumber" value={formData.storeContactNumber} onChange={handleChange} />
-                        <InputField label="Address Line 1" name="address1" value={formData.address1} onChange={handleChange} />
+                        <InputField label="Contact Email" name="storeEmail" value={formData.storeEmail} onChange={handleChange} error={formErrors.storeEmail} />
+                        <InputField label="Contact Number" name="storeContactNumber" value={formData.storeContactNumber} onChange={handleChange} error={formErrors.storeContactNumber} />
+                        <InputField label="Address Line 1" name="address1" value={formData.address1} onChange={handleChange} error={formErrors.address1} />
                         <InputField label="Address Line 2" name="address2" value={formData.address2} onChange={handleChange} />
-                        <InputField label="City" name="city" value={formData.city} onChange={handleChange} />
-                        <InputField label="State" name="state" value={formData.state} onChange={handleChange} />
-                        <InputField label="Zipcode" name="zipcode" value={formData.zipcode} onChange={handleChange} />
-                        <InputField label="Country" name="country" value={formData.country} onChange={handleChange} />
+                        <InputField label="City" name="city" value={formData.city} onChange={handleChange} error={formErrors.city} />
+                        <InputField label="State" name="state" value={formData.state} onChange={handleChange} error={formErrors.state} />
+                        <InputField label="Zipcode" name="zipcode" value={formData.zipcode} onChange={handleChange} error={formErrors.zipcode} />
+                        <InputField label="Country" name="country" value={formData.country} onChange={handleChange} error={formErrors.country} />
                     </div>
                 </Section>
 
-                {/* Document Uploads */}
                 <Section title="Document Uploads">
-                    <DocumentUploader label="Upload Liquor License" name="liquorLicenseUrl" onChange={handleChange} />
+                    <DocumentUploader label="Upload Liquor License" name="liquorLicenseUrl" onChange={handleChange} error={formErrors.liquorLicenseUrl} />
                 </Section>
 
-                {/* Store Timings & Holidays */}
                 <Section title="Store Timings & Holidays">
                     <div className="flex flex-col lg:flex-row lg:gap-8 space-y-6 lg:space-y-0">
-                        {/* Weekdays */}
                         <TimeRow
                             label="Weekdays"
                             openTime={formData.weekDaysOpenTime}
@@ -148,9 +193,8 @@ export const Onboarding = () => {
                             openName="weekDaysOpenTime"
                             closeName="weekDaysCloseTime"
                             onTimeChange={handleTimeChange}
+                            errors={formErrors}
                         />
-
-                        {/* Weekends */}
                         <TimeRow
                             label="Weekends"
                             openTime={formData.weekendOpenTime}
@@ -158,13 +202,12 @@ export const Onboarding = () => {
                             openName="weekendOpenTime"
                             closeName="weekendCloseTime"
                             onTimeChange={handleTimeChange}
+                            errors={formErrors}
                         />
                     </div>
-                    {/* Store Holidays */}
+
                     <div className="grid grid-cols-1 gap-4 mt-6">
                         <label className="font-semibold">Store Holidays</label>
-
-                        {/* Render each holiday date picker */}
                         {formData.holidayDates.map((date, index) => (
                             <div key={index} className="flex items-center gap-4">
                                 <DatePickerField
@@ -181,7 +224,6 @@ export const Onboarding = () => {
                                 </button>
                             </div>
                         ))}
-
                         <PrimaryButton
                             type="button"
                             onClick={handleAddHoliday}
@@ -190,11 +232,8 @@ export const Onboarding = () => {
                             + Add Holiday
                         </PrimaryButton>
                     </div>
-
-
                 </Section>
 
-                {/* Submit */}
                 <div className="flex justify-center gap-4 mt-8">
                     <PrimaryButton type="submit">{isPending ? 'Submitting...' : 'Submit'}</PrimaryButton>
                 </div>
@@ -210,16 +249,26 @@ const Section = ({ title, children }) => (
     </div>
 );
 
-const TimeRow = ({ label, openTime, closeTime, openName, closeName, onTimeChange }) => (
+const TimeRow = ({ label, openTime, closeTime, openName, closeName, onTimeChange, errors }) => (
     <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 flex-1 min-w-0">
         <label className="font-semibold col-span-1 whitespace-nowrap">{label}</label>
         <div className="flex flex-wrap items-center gap-2 col-span-2 w-full min-w-0">
             <div className="flex-1 min-w-[120px]">
-                <TimePickerField name={openName} value={openTime} onChange={(e) => onTimeChange(openName, e.target.value)} />
+                <TimePickerField
+                    name={openName}
+                    value={openTime}
+                    onChange={(e) => onTimeChange(openName, e.target.value)}
+                    error={errors?.[openName]}
+                />
             </div>
             <span className="text-gray-600">to</span>
             <div className="flex-1 min-w-[120px]">
-                <TimePickerField name={closeName} value={closeTime} onChange={(e) => onTimeChange(closeName, e.target.value)} />
+                <TimePickerField
+                    name={closeName}
+                    value={closeTime}
+                    onChange={(e) => onTimeChange(closeName, e.target.value)}
+                    error={errors?.[closeName]}
+                />
             </div>
         </div>
     </div>

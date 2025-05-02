@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaRegClock } from 'react-icons/fa';
 
-const TimePickerField = ({ label, name, value, onChange }) => {
+const TimePickerField = ({ label, name, value, onChange, error }) => {
     const [hours, setHours] = useState('12');
     const [minutes, setMinutes] = useState('00');
     const [ampm, setAmpm] = useState('AM');
@@ -114,6 +114,8 @@ const TimePickerField = ({ label, name, value, onChange }) => {
                     </div>
                 </div>
             )}
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+
         </div>
     );
 };
