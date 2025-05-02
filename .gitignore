@@ -12,10 +12,6 @@ yarn-error.log*
 pnpm-debug.log*
 .log
 
-# Environment variables
-.env*
-!.env.example
-
 # OS files
 .DS_Store
 Thumbs.db
@@ -29,9 +25,7 @@ Thumbs.db
 dist/
 coverage/
 
-# Optional: local development data
-*.local
-
+ 
 # Optional: vercel & netlify
 .vercel/
 .netlify/
